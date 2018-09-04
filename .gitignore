@@ -1,0 +1,9 @@
+build
+tmp
+.dep
+*~
+*.orig
+*.rej
+dreck
+*.o
+
