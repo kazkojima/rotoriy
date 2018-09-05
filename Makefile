@@ -1,4 +1,4 @@
-obj= main.o c3ga.o
+obj= main.o RotorIy.o c3ga.o
 src= $(obj:.cpp=.o)
 
 CPFLAGS= -g -O3

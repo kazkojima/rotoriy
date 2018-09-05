@@ -22,6 +22,8 @@
 
 using namespace c3ga;
 
+#include "RotorIy.h"
+
 #define	MYECHO_PORT 5790
 #define MAXLINE sizeof(struct B3packet)
 
@@ -35,8 +37,9 @@ extern int errno;
 #define SHOW_VIEWER      (1<<9)
 
 static int show_flags;
-static float filter_gain = 0.01f;
+static float filter_gain = 0.5f;
 
+#if 0
 static int
 mymillis (void)
 {
@@ -47,6 +50,7 @@ mymillis (void)
 
 #define GRAVITY_MSS 9.80665f
 #define GEPSILON 0.05f
+#endif
 
 void
 dreck (int sockfd)
@@ -61,15 +65,10 @@ dreck (int sockfd)
   int count = 0;
 
 
-  mv R;
-  mv S = 1;
-  mv X = 0;
-  mv I = 0;
-  mv u = e3;
-  mv v, y;
-  float nm;
   const float epsilon = 0.000001;
   const float dt = 0.001;
+  RotorIy RI (dt, filter_gain, epsilon);
+  mv S;
 
   for (;;)
     {
@@ -103,44 +102,20 @@ dreck (int sockfd)
 	  if (show_flags & SHOW_RAW_GYRO)
 	    printf("gx: %f gy: %f gz: %f\n", gx, gy, gz);
 
+	  // gyro offset calibration needed
 	  gx -= 0.015; gy -= -0.024; gz -= 0.017;
 
-	  X = dt*(gx * (e2^e3) + gy * (e3^e1) + gz * (e1^e2));
-	  y = ax * e1 + ay * e2 + az * e3;
-	  v = applyVersor(S, e3);
-	  mv Q, dS;
-	  nm = norm(y+v);
-	  if (norm(y+v) > 0.1)
-	    {
-	      mv P = ((1.0/nm) * (y+v)) * v;
-	      mv Y = -2.0 * log(P);
-	      float alpha = 1.0 - fabs(_Float(extractGrade(S, GRADE_0)));
-	      I = (1-epsilon)*I + epsilon*(filter_gain*dt*Y + X);
-	      X -= I;
-	      dS = exp(-0.5*(filter_gain*dt*Y + alpha*X));
-	    }
-	  else
-	    {
-	      I = (1-epsilon)*I + epsilon*X;
-	      X -= I;
-	      dS = exp(-0.5*X);
-	    }
-	  S = dS * S;
-	  //	  MotorUpdateIMU(gx, gy, gz, ax, ay, az);
+	  S = RI.UpdateIMU (ax, ay, az, gx, gy, gz);
 	}
 
       if (show_flags & SHOW_MOTOR)
-	printf ("S = %s, norm = %7.3f\n", S.c_str("%2.3f"), nm);
+	printf ("S = %s\n", S.c_str("%2.3f"));
       if (show_flags & SHOW_VIEWER)
 	{
 	  if ((count % 100) == 0)
 	    printf ("S=%s;$\n", S.c_str("%2.3f"));
 	  fflush (stdout);
 	}
-#if 0
-      if (show_flags & SHOW_LL)
-	printf ("should R-up %7.3f H-up %7.3f\r", -(q0*q1+q3*q2), q0*q2-q3*q1);
-#endif
       count++;
     }
 }
@@ -159,8 +134,6 @@ main (int argc, char *argv[])
   int option;
   char *s;
   struct sockaddr_in serv_addr;
-  struct servent *sp;
-  pthread_t pthread;
 
   while (--argc > 0 && (*++argv)[0] == '-')
     for (s = argv[0]+1; *s != '\0'; s++)
