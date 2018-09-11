@@ -52,6 +52,10 @@ mymillis (void)
 #define GEPSILON 0.05f
 #endif
 
+// 5 second
+#define IN_CALIB 5000
+#define CALIB_ALPHA 0.002f
+
 void
 dreck (int sockfd)
 {
@@ -62,6 +66,7 @@ dreck (int sockfd)
 
   float gx, gy, gz;
   float ax, ay, az;
+  float gx_offs = 0, gy_offs = 0, gz_offs = 0;
   int count = 0;
 
 
@@ -103,7 +108,22 @@ dreck (int sockfd)
 	    printf("gx: %f gy: %f gz: %f\n", gx, gy, gz);
 
 	  // gyro offset calibration needed
-	  gx -= 0.015; gy -= -0.024; gz -= 0.017;
+	  if (count < IN_CALIB)
+	    {
+	      gx_offs = (1-CALIB_ALPHA)*gx_offs + CALIB_ALPHA*gx;
+	      gy_offs = (1-CALIB_ALPHA)*gy_offs + CALIB_ALPHA*gy;
+	      gz_offs = (1-CALIB_ALPHA)*gz_offs + CALIB_ALPHA*gz;
+#ifdef DEBUG
+	      if ((count % 1000) == 0)
+	        {
+	          printf ("offset gx %2.6f gy %2.6f gz %2.6f\n",
+	                  gx_offs, gy_offs, gz_offs);
+		}
+#endif
+	      count++;
+	      continue;
+	    }
+	  gx -= gx_offs; gy -= gy_offs; gz -= gz_offs;
 
 	  S = RI.UpdateIMU (ax, ay, az, gx, gy, gz);
 	}

@@ -12,7 +12,9 @@ dreck: $(obj)
 %.o: %.cpp
 	$(CP) $(CPFLAGS) -c -o $@ $<
 
-main.cpp, c3ga.cpp: c3ga.h
+c3ga.o: c3ga.h
+RotorIy.o: RotorIy.h
+main.o: c3ga.h RotorIy.h
 
 clean:
 	rm -f dreck *~ *.o

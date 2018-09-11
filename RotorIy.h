@@ -28,6 +28,6 @@ class RotorIy
   // Integrated gyro bivector which shows its drift.
   mv _I;
   float _dt, _gain, _epsilon;
-  // Is 0.1 ok?
-  const float _norm_threshold = 0.1;
+  // Is 1.0(~0.1*GRAVITY_MSS) ok?
+  const float _norm_threshold = 1.0;
 };
