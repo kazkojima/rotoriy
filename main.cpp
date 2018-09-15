@@ -100,8 +100,17 @@ dreck (int sockfd)
 	  memcpy (ugx.bytes, &pkt.data[12], 4);
 	  memcpy (ugy.bytes, &pkt.data[16], 4);
 	  memcpy (ugz.bytes, &pkt.data[20], 4);
+#if 1
+	  // These 2 lines are bee3 specific because it sends IMU data
+	  // based on the NED orientaion. Convert it for the normal frame.
+	  // Since gz will be used as the coefficient of bivector e1^e2,
+	  // e1 <-> e2 makes the sign of gz minus.
+	  ay = uax.f; ax = uay.f; az = uaz.f;
+	  gy = ugx.f; gx = ugy.f; gz = -ugz.f;
+#else
 	  ax = uax.f; ay = uay.f; az = uaz.f;
 	  gx = ugx.f; gy = ugy.f; gz = ugz.f;
+#endif
 	  if (show_flags & SHOW_RAW_ACC)
 	    printf("ax: %f ay: %f az: %f\n", ax, ay, az);
 	  if (show_flags & SHOW_RAW_GYRO)
