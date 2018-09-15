@@ -39,7 +39,7 @@ RotorIy::UpdateIMU (float ax, float ay, float az, float gx, float gy, float gz)
   mv X = _dt*(gx*(e2^e3) + gy*(e3^e1) + gz*(e1^e2));
   mv y = ax*e1 + ay*e2 + az*e3;
 
-  mv v = applyVersor (_S, e3);
+  mv v = applyVersor (_S, -e3);
   mv dS;
   float nm = norm (y+v);
 
