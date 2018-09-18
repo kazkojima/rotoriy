@@ -48,7 +48,7 @@ RotorIy::UpdateIMU (float ax, float ay, float az, float gx, float gy, float gz)
     {
       mv P = ((1.0/nm)*(y+v))*v;
       mv Y = -2.0*log (P);
-      _I = (1 - _epsilon)*_I + _epsilon*(_gain*_dt*Y + X);
+      _I = (1 - _epsilon)*_I + _epsilon*X;
       X -= _I;
       dS = exp (-0.5*(_gain*_dt*Y + X));
     }
