@@ -24,10 +24,10 @@ class RotorIy
   mv UpdateIMU (float ax, float ay, float az, float gx, float gy, float gz);
  private:
   // Estimated rotor.
-  mv _S;
+  mv m_S;
   // Integrated gyro bivector which shows its drift.
-  mv _I;
-  float _dt, _gain, _epsilon;
+  mv m_I;
+  float m_dt, m_gain, m_epsilon;
   // Is 1.0(~0.1*GRAVITY_MSS) ok?
-  const float _norm_threshold = 1.0;
+  const float m_norm_threshold = 1.0;
 };

@@ -22,10 +22,10 @@ using namespace c3ga;
 #include "RotorIy.h"
 
 RotorIy::RotorIy (float dt, float gain, float epsilon):
-  _dt(dt), _gain(gain), _epsilon(epsilon)
+  m_dt(dt), m_gain(gain), m_epsilon(epsilon)
 {
-  _S = 1.0;
-  _I = 0.0;
+  m_S = 1.0;
+  m_I = 0.0;
 }
 
 RotorIy::~RotorIy ()
@@ -36,31 +36,31 @@ mv
 RotorIy::UpdateIMU (float ax, float ay, float az, float gx, float gy, float gz)
 {
   // Gyro. bivector and accel. directional vector.
-  mv X = _dt*(gx*(e2^e3) + gy*(e3^e1) + gz*(e1^e2));
+  mv X = m_dt*(gx*(e2^e3) + gy*(e3^e1) + gz*(e1^e2));
   mv y = ax*e1 + ay*e2 + az*e3;
 
-  mv v = applyVersor (_S, -e3);
+  mv v = applyVersor (m_S, -e3);
   mv dS;
   float nm = norm (y+v);
 
   // Don't fuse if y+v is too short.
-  if (norm(y+v) > _norm_threshold)
+  if (m_gain > 0 && nm > m_norm_threshold)
     {
       mv P = ((1.0/nm)*(y+v))*v;
       mv Y = -2.0*log (P);
-      _I = (1 - _epsilon)*_I + _epsilon*X;
-      X -= _I;
-      dS = exp (-0.5*(_gain*_dt*Y + X));
+      m_I = (1 - m_epsilon)*m_I + m_epsilon*X;
+      X -= m_I;
+      dS = exp (-0.5*(m_gain*m_dt*Y + X));
     }
   else
     {
       // Fall back to the dead reckoning.
-      _I = (1 - _epsilon)*_I + _epsilon*X;
-      X -= _I;
+      m_I = (1 - m_epsilon)*m_I + m_epsilon*X;
+      X -= m_I;
       dS = exp (-0.5*X);
     }
 
-  _S = dS*_S;
+  m_S = dS*m_S;
 
-  return _S;
+  return m_S;
 }
