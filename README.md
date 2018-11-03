@@ -9,5 +9,3 @@ The associated main.cpp is only a sample and isn't intended to the real one, tho
 The rotor identification is based on the method proposed at
 
 [Rotation Identification in Geometric Algebra: Theory and Application to the Navigation of Underwater Robots in the Field](https://pdfs.semanticscholar.org/b2a3/a6b7221b215840a7f910179665c8419b0ec0.pdf)
-
-The bivector branch is the estimation of bivector instead of rotor. Also it uses the interpolation given by Candy and Lasenby when updating bivector.
